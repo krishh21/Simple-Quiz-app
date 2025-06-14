@@ -14,46 +14,50 @@ const quizData = [
 ];
 
 
-// Variables to track the current question and score
+
 let currentQuestion = 0;
 let score = 0;
 
-// Getting HTML elements
-const questionEl = document.getElementById("question"); // Displays the question
-const optionsEl = document.getElementById("options"); // Holds answer choices
-const nextBtn = document.getElementById("next-btn"); // Button to move to next question
-const scoreEl = document.getElementById("score"); // Displays final score
+// DOM
+const questionEl = document.getElementById("question");  
+const optionsEl = document.getElementById("options"); 
+const nextBtn = document.getElementById("next-btn"); 
+const scoreEl = document.getElementById("score"); 
 
 // Function to load a question
 function loadQuestion() {
-    let q = quizData[currentQuestion]; // Fetch the current question
-    questionEl.textContent = q.question; // Display the question
-    optionsEl.innerHTML = ""; // Clear previous options
+    let q = quizData[currentQuestion]; 
+    questionEl.textContent = q.question;
+    optionsEl.innerHTML = ""; 
 
-    // Loop to create answer buttons dynamically
+    // Loop to create answer buttons 
     q.options.forEach(option => {
-        const btn = document.createElement("button"); // Create a button
-        btn.textContent = option; // Set button text
-        btn.onclick = () => checkAnswer(option); // Add click event
-        optionsEl.appendChild(btn); // Append button to the options container
+        const btn = document.createElement("button");
+        btn.textContent = option; 
+        btn.onclick = () => checkAnswer(option); 
+        optionsEl.appendChild(btn); 
     });
 }
 
 // Function to check the user's answer
 function checkAnswer(selected) {
-    if (selected === quizData[currentQuestion].answer) { // Compare selection with correct answer
-        score++; // Increment score if correct
+    if (selected === quizData[currentQuestion].answer) { 
+        score++;
     }
     currentQuestion++; // Move to next question
 
-    // Check if the quiz is over
+    // if quiz ended
     if (currentQuestion < quizData.length) {
         loadQuestion(); // Load the next question
     } else {
-        // Show final results
+        // final results
         questionEl.textContent = "Quiz Completed!";
-        optionsEl.innerHTML = ""; // Remove options
-        nextBtn.style.display = "none"; // Hide next button
-        scoreEl.textContent = `Final Score: ${score} / ${quizData.length}`; // Show final score
+        optionsEl.innerHTML = "";
+        nextBtn.style.display = "none";
+        scoreEl.textContent = `Final Score: ${score} / ${quizData.length}`;
     }
 }
+
+// Load first question on page load
+nextBtn.onclick = () => loadQuestion();
+loadQuestion();
