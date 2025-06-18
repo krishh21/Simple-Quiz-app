@@ -8,26 +8,23 @@
 </head>
 <body>
   <div class="quiz-container">
-    <h1>Aptitude Quiz</h1>
-
-    <div id="progress-bar">
-      <div id="progress"></div>
+    <h1>JavaScript Quiz</h1>
+    <div id="progress-container">
+      <div id="progress-bar"></div>
     </div>
-
-    <div id="timer">Time Left: <span id="time">15</span>s</div>
-
-    <p id="question"></p>
+    <div id="timer">Time Left: 60s</div>
+    <div id="question"></div>
     <div id="options"></div>
-
-    <button id="next-btn">Next Question</button>
-    <p id="score"></p>
-    
-    <div id="leaderboard-container" style="display:none;">
-      <h2>🏆 Leaderboard</h2>
-      <ul id="leaderboard"></ul>
+    <div id="feedback"></div>
+    <div class="btn-group">
+      <button id="prev-btn">Previous</button>
+      <button id="next-btn">Next</button>
     </div>
+    <div id="result"></div>
+    <button id="restart-btn" style="display:none;">Restart Quiz</button>
+    <h2>Leaderboard</h2>
+    <ol id="leaderboard"></ol>
   </div>
-
   <script src="logic.js"></script>
 </body>
 </html>
