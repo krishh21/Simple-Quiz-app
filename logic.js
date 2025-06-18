@@ -22,127 +22,124 @@ const quizData = [
   ];
   
   
-  let currentQuestion = 0;
-  let score = 0;
-  let userAnswers = Array(quizData.length).fill(null);
-  let timeLeft = 60;
-  let timer;
-  
-  // Elements
-  const questionEl = document.getElementById("question");
-  const optionsEl = document.getElementById("options");
-  const nextBtn = document.getElementById("next-btn");
-  const prevBtn = document.getElementById("prev-btn");
-  const feedbackEl = document.getElementById("feedback");
-  const resultEl = document.getElementById("result");
-  const restartBtn = document.getElementById("restart-btn");
-  const progressBar = document.getElementById("progress-bar");
-  const timerEl = document.getElementById("timer");
-  const leaderboardEl = document.getElementById("leaderboard");
-  
-  function loadQuestion() {
-    const q = quizData[currentQuestion];
-    questionEl.textContent = `Q${currentQuestion + 1}. ${q.question}`;
-    optionsEl.innerHTML = "";
-    feedbackEl.textContent = "";
-  
-    q.options.forEach(option => {
-      const btn = document.createElement("button");
-      btn.textContent = option;
-      btn.onclick = () => {
-        userAnswers[currentQuestion] = option;
-        giveFeedback(option === q.answer);
-      };
-      if (userAnswers[currentQuestion] === option) {
-        btn.style.backgroundColor = "#666";
+
+let currentQuestion = 0;
+let score = 0;
+let userAnswers = Array(quizData.length).fill(null);
+let timeLeft = 60;
+let timer;
+
+// Elements
+const questionEl = document.getElementById("question");
+const optionsEl = document.getElementById("options");
+const nextBtn = document.getElementById("next-btn");
+const prevBtn = document.getElementById("prev-btn");
+const feedbackEl = document.getElementById("feedback");
+const resultEl = document.getElementById("result");
+const restartBtn = document.getElementById("restart-btn");
+const timerEl = document.getElementById("timer");
+const progressEl = document.getElementById("progress"); // ✅ corrected from 'progress-bar'
+
+function loadQuestion() {
+  const q = quizData[currentQuestion];
+  questionEl.textContent = `Q${currentQuestion + 1}. ${q.question}`;
+  optionsEl.innerHTML = "";
+  feedbackEl.textContent = "";
+
+  q.options.forEach(option => {
+    const btn = document.createElement("button");
+    btn.textContent = option;
+    btn.disabled = userAnswers[currentQuestion] !== null;
+
+    // Style selected answer
+    if (userAnswers[currentQuestion] === option) {
+      btn.classList.add(userAnswers[currentQuestion] === q.answer ? "correct" : "incorrect");
+    }
+
+    btn.onclick = () => {
+      if (userAnswers[currentQuestion] !== null) return;
+
+      userAnswers[currentQuestion] = option;
+
+      if (option === q.answer) {
+        btn.classList.add("correct");
+        feedbackEl.textContent = "✅ Correct!";
+      } else {
+        btn.classList.add("incorrect");
+        feedbackEl.textContent = "❌ Incorrect!";
       }
-      optionsEl.appendChild(btn);
-    });
-  
-    updateProgressBar();
-  }
-  
-  function giveFeedback(correct) {
-    feedbackEl.textContent = correct ? "✅ Correct!" : "❌ Incorrect!";
-  }
-  
-  nextBtn.onclick = () => {
-    if (currentQuestion < quizData.length - 1) {
-      currentQuestion++;
-      loadQuestion();
-    } else {
-      endQuiz();
-    }
-  };
-  
-  prevBtn.onclick = () => {
-    if (currentQuestion > 0) {
-      currentQuestion--;
-      loadQuestion();
-    }
-  };
-  
-  restartBtn.onclick = () => {
-    currentQuestion = 0;
-    score = 0;
-    userAnswers.fill(null);
-    resultEl.textContent = "";
-    feedbackEl.textContent = "";
-    restartBtn.style.display = "none";
-    nextBtn.style.display = "inline-block";
-    prevBtn.style.display = "inline-block";
-    startTimer();
+
+      // Disable all options after selection
+      Array.from(optionsEl.children).forEach(b => b.disabled = true);
+    };
+
+    optionsEl.appendChild(btn);
+  });
+
+  updateProgressBar();
+}
+
+function updateProgressBar() {
+  const progress = ((currentQuestion + 1) / quizData.length) * 100;
+  progressEl.style.width = `${progress}%`;
+}
+
+nextBtn.onclick = () => {
+  if (currentQuestion < quizData.length - 1) {
+    currentQuestion++;
     loadQuestion();
-  };
-  
-  function updateProgressBar() {
-    const progress = ((currentQuestion + 1) / quizData.length) * 100;
-    progressBar.style.width = `${progress}%`;
+  } else {
+    endQuiz();
   }
-  
-  function endQuiz() {
-    clearInterval(timer);
-    score = userAnswers.filter((ans, idx) => ans === quizData[idx].answer).length;
-    resultEl.textContent = `You scored ${score} out of ${quizData.length}`;
-    saveToLeaderboard(score);
-    displayLeaderboard();
-    restartBtn.style.display = "inline-block";
-    nextBtn.style.display = "none";
-    prevBtn.style.display = "none";
+};
+
+prevBtn.onclick = () => {
+  if (currentQuestion > 0) {
+    currentQuestion--;
+    loadQuestion();
   }
-  
-  function startTimer() {
-    clearInterval(timer);
-    timeLeft = 60;
-    timer = setInterval(() => {
-      timerEl.textContent = `Time Left: ${timeLeft}s`;
-      if (timeLeft <= 0) {
-        clearInterval(timer);
-        endQuiz();
-      }
-      timeLeft--;
-    }, 1000);
-  }
-  
-  function saveToLeaderboard(score) {
-    const leaderboard = JSON.parse(localStorage.getItem("leaderboard") || "[]");
-    leaderboard.push({ score, date: new Date().toLocaleString() });
-    leaderboard.sort((a, b) => b.score - a.score);
-    localStorage.setItem("leaderboard", JSON.stringify(leaderboard.slice(0, 5)));
-  }
-  
-  function displayLeaderboard() {
-    const leaderboard = JSON.parse(localStorage.getItem("leaderboard") || "[]");
-    leaderboardEl.innerHTML = "";
-    leaderboard.forEach(entry => {
-      const li = document.createElement("li");
-      li.textContent = `${entry.score} points - ${entry.date}`;
-      leaderboardEl.appendChild(li);
-    });
-  }
-  
-  // Start
+};
+
+restartBtn.onclick = () => {
+  currentQuestion = 0;
+  score = 0;
+  userAnswers.fill(null);
+  resultEl.textContent = "";
+  feedbackEl.textContent = "";
+  restartBtn.style.display = "none";
+  nextBtn.style.display = "inline-block";
+  prevBtn.style.display = "inline-block";
   startTimer();
   loadQuestion();
-  displayLeaderboard();
+};
+
+function endQuiz() {
+  clearInterval(timer);
+  score = userAnswers.filter((ans, idx) => ans === quizData[idx].answer).length;
+  resultEl.textContent = `You scored ${score} out of ${quizData.length}`;
+  restartBtn.style.display = "inline-block";
+  nextBtn.style.display = "none";
+  prevBtn.style.display = "none";
+}
+
+function startTimer() {
+  clearInterval(timer);
+  timeLeft = 60;
+  timer = setInterval(() => {
+    timerEl.textContent = `Time Left: ${timeLeft}s`;
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      endQuiz();
+    }
+    timeLeft--;
+  }, 1000);
+}
+
+// Start quiz
+startTimer();
+loadQuestion();
+
+
+
   
+   
